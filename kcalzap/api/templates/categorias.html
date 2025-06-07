@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Categorias{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Distribuição de Macronutrientes</h5>
+                <div class="chart-container">
+                    <canvas id="macronutrientesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Resumo</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Carboidratos
+                        <span class="badge bg-primary rounded-pill">{{ carboidratos|default(0) }}g</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Proteínas
+                        <span class="badge bg-success rounded-pill">{{ proteinas|default(0) }}g</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Gorduras
+                        <span class="badge bg-warning rounded-pill">{{ gorduras|default(0) }}g</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Histórico por Categoria</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Refeição</th>
+                                <th>Carboidratos</th>
+                                <th>Proteínas</th>
+                                <th>Gorduras</th>
+                                <th>Total Kcal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for refeicao in historico|default([]) %}
+                            <tr>
+                                <td>{{ refeicao.data_hora|default('') }}</td>
+                                <td>{{ refeicao.descricao }}</td>
+                                <td>{{ refeicao.carboidratos }}g</td>
+                                <td>{{ refeicao.proteinas }}g</td>
+                                <td>{{ refeicao.gorduras }}g</td>
+                                <td>{{ refeicao.calorias }} kcal</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center">Nenhum registro encontrado</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const ctx = document.getElementById('macronutrientesChart').getContext('2d');
+    const dados = {
+        labels: ['Carboidratos', 'Proteínas', 'Gorduras'],
+        datasets: [{
+            data: [
+                {{ carboidratos|default(0) }},
+                {{ proteinas|default(0) }},
+                {{ gorduras|default(0) }}
+            ],
+            backgroundColor: [
+                '#0d6efd',
+                '#198754',
+                '#ffc107'
+            ]
+        }]
+    };
+    
+    new Chart(ctx, {
+        type: 'pie',
+        data: dados,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

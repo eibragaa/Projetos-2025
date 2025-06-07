@@ -1,0 +1,17 @@
+{
+  "articles": [
+    {
+      "number": 1,
+      "text": "Não há crime sem lei anterior que o defina. Não há pena sem prévia cominação legal."
+    },
+    {
+      "number": 2,
+      "text": "Ninguém pode ser punido por fato que lei posterior deixa de considerar crime, cessando em virtude dela a execução e os efeitos penais da sentença condenatória."
+    },
+    {
+      "number": 3,
+      "text": "A lei penal não retroagirá, salvo para beneficiar o réu."
+    }
+    // ... Adicione mais artigos conforme necessário
+  ]
+}

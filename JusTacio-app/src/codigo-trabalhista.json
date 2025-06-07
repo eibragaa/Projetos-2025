@@ -1,0 +1,16 @@
+{
+  "articles": [
+    {
+      "number": 1,
+      "text": "Esta Consolidação estatui as normas que regulam as relações individuais e coletivas de trabalho, nela previstas."
+    },
+    {
+      "number": 2,
+      "text": "Considera-se empregador a empresa, individual ou coletiva, que, assumindo os riscos da atividade econômica, admite, assalaria e dirige a prestação pessoal de serviço."
+    },
+    {
+      "number": 3,
+      "text": "Considera-se empregado toda pessoa física que prestar serviços de natureza não eventual a empregador, sob a dependência deste e mediante salário."
+    }
+  ]
+}

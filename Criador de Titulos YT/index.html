@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Títulos para YouTube</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6">
+
+    <div class="w-full max-w-2xl bg-white/90 backdrop-blur-md shadow-xl rounded-xl p-6 sm:p-8 md:p-10">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Gerador de Títulos para YouTube</h1>
+            <p class="text-gray-700 mt-2">Crie títulos virais e otimizados com o poder da IA (Groq & Gemini API).</p>
+        </header>
+
+        <form id="titleForm" class="space-y-6">
+            <div>
+                <label for="apiKey" class="block text-sm font-medium mb-1">Sua Chave API Groq:</label>
+                <input type="password" id="apiKey" name="apiKey" class="w-full md3-input" value="" placeholder="Cole sua chave API Groq aqui" required>
+                <p class="text-xs text-gray-600 mt-1">Necessária para a geração de títulos com Groq. Para análise/refinamento com Gemini, a chave é gerenciada pelo ambiente.</p>
+            </div>
+
+            <div>
+                <label for="mainTopic" class="block text-sm font-medium mb-1">Tema Principal do Vídeo:</label>
+                <input type="text" id="mainTopic" name="mainTopic" class="w-full md3-input" placeholder="Ex: Como fazer o melhor café" required>
+            </div>
+
+            <div>
+                <label for="keywords" class="block text-sm font-medium mb-1">Palavras-chave (separadas por vírgula):</label>
+                <input type="text" id="keywords" name="keywords" class="w-full md3-input" placeholder="Ex: café especial, barista, grãos arábica">
+            </div>
+
+            <div>
+                <label for="titleStyle" class="block text-sm font-medium mb-1">Estilo do Título (para Groq):</label>
+                <select id="titleStyle" name="titleStyle" class="w-full md3-input">
+                    <option value="Viral (Chamativo)">Viral (Chamativo)</option>
+                    <option value="Informativo e Direto">Informativo e Direto</option>
+                    <option value="Lista (Top X)">Lista (Top X)</option>
+                    <option value="Pergunta Curiosa">Pergunta Curiosa</option>
+                    <option value="Tutorial/Como Fazer">Tutorial/Como Fazer</option>
+                    <option value="Comparação (X vs Y)">Comparação (X vs Y)</option>
+                    <option value="Storytelling">Storytelling</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="numSuggestions" class="block text-sm font-medium mb-1">Número de Sugestões (para Groq):</label>
+                <input type="number" id="numSuggestions" name="numSuggestions" class="w-full md3-input" value="5" min="1" max="10" required>
+            </div>
+
+            <button type="submit" id="generateButton" class="w-full md3-button">
+                Gerar Títulos (Groq API)
+            </button>
+        </form>
+
+        <div id="loadingIndicator" class="hidden loader mt-6"></div>
+        <div id="errorMessage" class="hidden error-message mt-6"></div>
+
+        <div id="results" class="mt-8">
+            </div>
+
+        <section class="gemini-analysis-section">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">Analisar Título Existente com Gemini ✨</h2>
+            <form id="geminiAnalysisForm" class="space-y-4">
+                <div>
+                    <label for="titleToAnalyze" class="block text-sm font-medium text-gray-700 mb-1">Cole seu título do YouTube aqui:</label>
+                    <input type="text" id="titleToAnalyze" name="titleToAnalyze" class="w-full md3-input" placeholder="Ex: MEU NOVO SETUP GAMER DE R$20.000 REVELADO!" required>
+                </div>
+                <button type="submit" id="analyzeWithGeminiButton" class="w-full md3-button md3-button-secondary">
+                    Analisar Título (Gemini API)
+                </button>
+            </form>
+            <div id="geminiLoadingIndicator" class="hidden loader loader-gemini mt-6"></div>
+            <div id="geminiErrorMessage" class="hidden error-message mt-6"></div>
+            <div id="geminiAnalysisResult" class="mt-6">
+                </div>
+        </section>
+    </div>
+
+    <footer id="appFooter" class="observation-footer w-full max-w-2xl">
+        <p><strong>Observação:</strong></p>
+        <p>As pontuações de viralização (Groq) são simuladas para fins demonstrativos. A qualidade final do título depende da sua estratégia e público.</p>
+        <p>A análise e o refinamento de títulos (Gemini) fornecem sugestões baseadas em IA para otimização. Teste diferentes abordagens.</p>
+        <p>Esses títulos são otimizados para SEO e CTR, chamativos e despertam curiosidade, oferecendo valor claro para o espectador. Eles também seguem padrões de vídeos virais e são adequados para a plataforma YouTube.</p>
+    </footer>
+
+    <script src="js/script.js" defer></script>
+</body>
+</html>

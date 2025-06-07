@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Visão Geral{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Card de Calorias -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Calorias Hoje</h5>
+                <h2 class="display-4">{{ calorias_hoje|default(0) }}</h2>
+                <p class="text-muted">de {{ meta_calorias|default(2000) }} kcal</p>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: {{ (calorias_hoje|default(0) / meta_calorias|default(2000) * 100)|round }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card de Jejum -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Jejum Atual</h5>
+                <h2 class="display-4">{{ horas_jejum|default(0) }}h</h2>
+                <p class="text-muted">Meta: {{ meta_jejum|default(16) }}h</p>
+                <div class="progress">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ (horas_jejum|default(0) / meta_jejum|default(16) * 100)|round }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card de Análises -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Análises Restantes</h5>
+                <h2 class="display-4">{{ analises_restantes|default(5) }}</h2>
+                <p class="text-muted">Plano: {{ plano|default('Gratuito')|title }}</p>
+                {% if plano == 'gratuito' %}
+                <a href="/subscribe" class="btn btn-primary">Fazer Upgrade</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráfico de Nutrientes -->
+<div class="row mt-4">
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Distribuição de Nutrientes</h5>
+                <div class="chart-container">
+                    <canvas id="nutrientesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimas Refeições -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Últimas Refeições</h5>
+                <div class="list-group">
+                    {% for refeicao in ultimas_refeicoes|default([]) %}
+                    <div class="list-group-item">
+                        <h6 class="mb-1">{{ refeicao.descricao }}</h6>
+                        <small class="text-muted">{{ refeicao.calorias }} kcal</small>
+                        <br>
+                        <small class="text-muted">{{ refeicao.data_hora|default('') }}</small>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted">
+                        <p>Nenhuma refeição registrada</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const ctx = document.getElementById('nutrientesChart').getContext('2d');
+    const dados = [
+        {{ carboidratos|default(0) }},
+        {{ proteinas|default(0) }},
+        {{ gorduras|default(0) }}
+    ];
+    criarGraficoNutrientes(ctx, dados);
+});
+</script>
+{% endblock %} 

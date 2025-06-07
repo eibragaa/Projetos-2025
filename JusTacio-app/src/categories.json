@@ -1,0 +1,17 @@
+[
+  {
+    "id": "penal",
+    "name": "Penal",
+    "color": "#1976d2"
+  },
+  {
+    "id": "trabalhista",
+    "name": "Trabalhista",
+    "color": "#43a047"
+  },
+  {
+    "id": "consumidor",
+    "name": "Consumidor",
+    "color": "#ff9800"
+  }
+]

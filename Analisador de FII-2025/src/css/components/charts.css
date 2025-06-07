@@ -1,0 +1,375 @@
+/* Estilos específicos para gráficos */
+
+/* Container dos gráficos */
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.chart-card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Títulos dos gráficos */
+.chart-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chart-title-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #3b82f6;
+}
+
+/* Container do canvas */
+.chart-canvas-container {
+    position: relative;
+    height: 16rem;
+    width: 100%;
+}
+
+.chart-canvas {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* Loading state dos gráficos */
+.chart-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 16rem;
+    color: #6b7280;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.chart-loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.chart-loading-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+/* Empty state dos gráficos */
+.chart-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 16rem;
+    color: #9ca3af;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.chart-empty-icon {
+    width: 3rem;
+    height: 3rem;
+    color: #d1d5db;
+}
+
+.chart-empty-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+    text-align: center;
+}
+
+/* Legendas customizadas */
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+    justify-content: center;
+}
+
+.chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.chart-legend-color {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 0.125rem;
+    flex-shrink: 0;
+}
+
+/* Tooltips customizados */
+.chart-tooltip {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(4px);
+}
+
+/* Estilos específicos por tipo de gráfico */
+
+/* Gráfico de Pizza (Setor) */
+.sector-chart-container {
+    position: relative;
+}
+
+.sector-chart-info {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+}
+
+.sector-chart-total {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.sector-chart-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Gráfico de Barras (Dividend Yield) */
+.dividend-chart-container {
+    position: relative;
+}
+
+.dividend-chart-highlight {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+/* Gráfico de Dispersão (P/VP vs DY) */
+.scatter-chart-container {
+    position: relative;
+}
+
+.scatter-chart-quadrants {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.scatter-quadrant {
+    position: absolute;
+    border: 1px dashed rgba(107, 114, 128, 0.3);
+}
+
+/* Responsividade dos gráficos */
+@media (max-width: 1024px) {
+    .charts-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .chart-card {
+        padding: 1rem;
+    }
+    
+    .chart-canvas-container {
+        height: 14rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .charts-container {
+        gap: 0.75rem;
+    }
+    
+    .chart-card {
+        padding: 0.75rem;
+    }
+    
+    .chart-title {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .chart-canvas-container {
+        height: 12rem;
+    }
+    
+    .chart-legend {
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+    
+    .chart-legend-item {
+        font-size: 0.6875rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .chart-card {
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+    }
+    
+    .chart-canvas-container {
+        height: 10rem;
+    }
+    
+    .chart-legend {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+}
+
+/* Animações dos gráficos */
+.chart-fade-in {
+    animation: chartFadeIn 0.6s ease-out;
+}
+
+@keyframes chartFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chart-scale-in {
+    animation: chartScaleIn 0.4s ease-out;
+}
+
+@keyframes chartScaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Estados de interação */
+.chart-interactive {
+    cursor: pointer;
+}
+
+.chart-interactive:hover {
+    opacity: 0.8;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Cores personalizadas para os gráficos */
+:root {
+    --chart-color-1: #3b82f6;
+    --chart-color-2: #10b981;
+    --chart-color-3: #f59e0b;
+    --chart-color-4: #ef4444;
+    --chart-color-5: #8b5cf6;
+    --chart-color-6: #06b6d4;
+    --chart-color-7: #84cc16;
+    --chart-color-8: #f97316;
+    --chart-color-9: #ec4899;
+    --chart-color-10: #6b7280;
+}
+
+/* Modo escuro */
+@media (prefers-color-scheme: dark) {
+    .chart-card {
+        background: #1f2937;
+        color: #f9fafb;
+    }
+    
+    .chart-title {
+        color: #f9fafb;
+    }
+    
+    .chart-loading-text,
+    .chart-empty-text {
+        color: #d1d5db;
+    }
+    
+    .chart-legend-item {
+        color: #d1d5db;
+    }
+    
+    .sector-chart-total {
+        color: #f9fafb;
+    }
+    
+    .sector-chart-label {
+        color: #d1d5db;
+    }
+}
+
+/* Suporte para movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+    .chart-fade-in,
+    .chart-scale-in {
+        animation: none;
+    }
+    
+    .chart-card {
+        transition: none;
+    }
+    
+    .chart-interactive:hover {
+        transition: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    .chart-card {
+        box-shadow: none;
+        border: 1px solid #000;
+        break-inside: avoid;
+    }
+    
+    .chart-card:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .charts-container {
+        display: block;
+    }
+    
+    .chart-card {
+        margin-bottom: 1rem;
+        page-break-inside: avoid;
+    }
+}

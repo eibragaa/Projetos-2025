@@ -1,0 +1,16 @@
+{
+  "articles": [
+    {
+      "number": 1,
+      "text": "O presente Código estabelece normas de proteção e defesa do consumidor, de ordem pública e interesse social."
+    },
+    {
+      "number": 2,
+      "text": "Consumidor é toda pessoa física ou jurídica que adquire ou utiliza produto ou serviço como destinatário final."
+    },
+    {
+      "number": 3,
+      "text": "Fornecedor é toda pessoa física ou jurídica, pública ou privada, nacional ou estrangeira, bem como os entes despersonalizados, que desenvolvem atividades de produção, montagem, criação, construção, transformação, importação, exportação, distribuição ou comercialização de produtos ou prestação de serviços."
+    }
+  ]
+}

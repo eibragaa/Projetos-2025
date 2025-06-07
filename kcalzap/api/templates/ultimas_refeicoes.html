@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Últimas Refeições{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">Histórico de Refeições</h5>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary active" data-filter="hoje">Hoje</button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="semana">Esta Semana</button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="mes">Este Mês</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Horário</th>
+                                <th>Foto</th>
+                                <th>Descrição</th>
+                                <th>Nutrientes</th>
+                                <th>Calorias</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="refeicoes-lista">
+                            {% for refeicao in refeicoes|default([]) %}
+                            <tr>
+                                <td>{{ refeicao.data_hora|default('') }}</td>
+                                <td>
+                                    {% if refeicao.foto_url %}
+                                    <img src="{{ refeicao.foto_url }}" alt="Foto da refeição" class="img-thumbnail" style="width: 100px;">
+                                    {% else %}
+                                    <span class="text-muted">Sem foto</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ refeicao.descricao }}</td>
+                                <td>
+                                    <small class="d-block">Carb: {{ refeicao.carboidratos }}g</small>
+                                    <small class="d-block">Prot: {{ refeicao.proteinas }}g</small>
+                                    <small class="d-block">Gord: {{ refeicao.gorduras }}g</small>
+                                </td>
+                                <td>{{ refeicao.calorias }} kcal</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detalheModal" data-id="{{ refeicao.id }}">
+                                        Detalhes
+                                    </button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center">Nenhuma refeição registrada</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalhes -->
+<div class="modal fade" id="detalheModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes da Refeição</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <img id="modal-foto" src="" alt="Foto da refeição" class="img-fluid rounded">
+                </div>
+                <h6>Informações Nutricionais</h6>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Carboidratos:</strong> <span id="modal-carb"></span>g
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Proteínas:</strong> <span id="modal-prot"></span>g
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Gorduras:</strong> <span id="modal-gord"></span>g
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Total de Calorias:</strong> <span id="modal-kcal"></span> kcal
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Filtros de data
+    const filterButtons = document.querySelectorAll('[data-filter]');
+    filterButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            const filtro = e.target.dataset.filter;
+            carregarRefeicoes(filtro);
+        });
+    });
+
+    // Modal de detalhes
+    const detalheModal = document.getElementById('detalheModal');
+    detalheModal.addEventListener('show.bs.modal', async (e) => {
+        const button = e.relatedTarget;
+        const id = button.dataset.id;
+        
+        try {
+            const response = await fetch(`/api/refeicao/${id}`);
+            const refeicao = await response.json();
+            
+            document.getElementById('modal-foto').src = refeicao.foto_url;
+            document.getElementById('modal-carb').textContent = refeicao.carboidratos;
+            document.getElementById('modal-prot').textContent = refeicao.proteinas;
+            document.getElementById('modal-gord').textContent = refeicao.gorduras;
+            document.getElementById('modal-kcal').textContent = refeicao.calorias;
+        } catch (error) {
+            console.error('Erro ao carregar detalhes:', error);
+        }
+    });
+});
+
+async function carregarRefeicoes(filtro) {
+    try {
+        const response = await fetch(`/api/refeicoes?filtro=${filtro}`);
+        const refeicoes = await response.json();
+        
+        const tbody = document.getElementById('refeicoes-lista');
+        tbody.innerHTML = refeicoes.length ? refeicoes.map(r => `
+            <tr>
+                <td>${formatarData(r.data_hora)}</td>
+                <td>
+                    ${r.foto_url ? `<img src="${r.foto_url}" alt="Foto da refeição" class="img-thumbnail" style="width: 100px;">` : '<span class="text-muted">Sem foto</span>'}
+                </td>
+                <td>${r.descricao}</td>
+                <td>
+                    <small class="d-block">Carb: ${r.carboidratos}g</small>
+                    <small class="d-block">Prot: ${r.proteinas}g</small>
+                    <small class="d-block">Gord: ${r.gorduras}g</small>
+                </td>
+                <td>${r.calorias} kcal</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detalheModal" data-id="${r.id}">
+                        Detalhes
+                    </button>
+                </td>
+            </tr>
+        `).join('') : '<tr><td colspan="6" class="text-center">Nenhuma refeição registrada</td></tr>';
+    } catch (error) {
+        console.error('Erro ao carregar refeições:', error);
+    }
+}
+</script>
+{% endblock %} 

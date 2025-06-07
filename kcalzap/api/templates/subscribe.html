@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Assinatura{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="text-center mb-5">
+            <h2>Escolha seu Plano</h2>
+            <p class="lead">Desbloqueie recursos premium e monitore sua alimentação sem limites</p>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+            <!-- Plano Gratuito -->
+            <div class="col">
+                <div class="card mb-4 rounded-3 shadow-sm">
+                    <div class="card-header py-3">
+                        <h4 class="my-0 fw-normal">Gratuito</h4>
+                    </div>
+                    <div class="card-body">
+                        <h1 class="card-title">R$ 0<small class="text-muted fw-light">/mês</small></h1>
+                        <ul class="list-unstyled mt-3 mb-4">
+                            <li>5 análises/mês</li>
+                            <li>Sugestões básicas</li>
+                            <li>Painel web básico</li>
+                            <li>Suporte por email</li>
+                        </ul>
+                        <button type="button" class="w-100 btn btn-lg btn-outline-primary" disabled>Plano Atual</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plano Premium Mensal -->
+            <div class="col">
+                <div class="card mb-4 rounded-3 shadow-sm border-primary">
+                    <div class="card-header py-3 text-white bg-primary border-primary">
+                        <h4 class="my-0 fw-normal">Premium Mensal</h4>
+                    </div>
+                    <div class="card-body">
+                        <h1 class="card-title">R$ 19,90<small class="text-muted fw-light">/mês</small></h1>
+                        <ul class="list-unstyled mt-3 mb-4">
+                            <li>Análises ilimitadas</li>
+                            <li>Sugestões personalizadas</li>
+                            <li>Painel web completo</li>
+                            <li>Suporte prioritário</li>
+                        </ul>
+                        <button type="button" class="w-100 btn btn-lg btn-primary" onclick="assinar('mensal')">
+                            Assinar Agora
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plano Premium Anual -->
+            <div class="col">
+                <div class="card mb-4 rounded-3 shadow-sm border-success">
+                    <div class="card-header py-3 text-white bg-success border-success">
+                        <h4 class="my-0 fw-normal">Premium Anual</h4>
+                    </div>
+                    <div class="card-body">
+                        <h1 class="card-title">R$ 199,90<small class="text-muted fw-light">/ano</small></h1>
+                        <ul class="list-unstyled mt-3 mb-4">
+                            <li>Tudo do plano mensal</li>
+                            <li>2 meses grátis</li>
+                            <li>Relatórios avançados</li>
+                            <li>Suporte VIP</li>
+                        </ul>
+                        <button type="button" class="w-100 btn btn-lg btn-success" onclick="assinar('anual')">
+                            Economize 17%
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Perguntas Frequentes</h5>
+                        <div class="accordion" id="faqAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                        Como funciona a cobrança?
+                                    </button>
+                                </h2>
+                                <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        A cobrança é feita automaticamente através do cartão de crédito. No plano mensal, você será cobrado mensalmente, e no plano anual, uma vez por ano.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                        Posso cancelar a qualquer momento?
+                                    </button>
+                                </h2>
+                                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        Sim! Você pode cancelar sua assinatura a qualquer momento. O acesso premium continuará até o fim do período pago.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                        Quais formas de pagamento são aceitas?
+                                    </button>
+                                </h2>
+                                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        Aceitamos todas as principais bandeiras de cartão de crédito: Visa, Mastercard, American Express e Elo.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function assinar(plano) {
+    try {
+        const response = await fetch('/criar-sessao-checkout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ plano })
+        });
+        
+        const session = await response.json();
+        
+        if (session.error) {
+            alert(session.error);
+            return;
+        }
+        
+        const stripe = Stripe('{{ stripe_public_key }}');
+        const result = await stripe.redirectToCheckout({
+            sessionId: session.id
+        });
+        
+        if (result.error) {
+            alert(result.error.message);
+        }
+    } catch (error) {
+        console.error('Erro ao processar assinatura:', error);
+        alert('Erro ao processar assinatura. Tente novamente.');
+    }
+}
+</script>
+{% endblock %} 

@@ -1,0 +1,41 @@
+# Dependências
+node_modules/
+package-lock.json
+
+# Arquivos de ambiente
+.env
+
+# Arquivos do WhatsApp
+tokens/
+*.data.json
+session.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Diretório de build
+dist/
+build/
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Diretório de cache do Venom
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Outros
+.vscode/
+.idea/
+*.tokens
+
+# Dados do bot
+data/threads.json
+
+# Docker
+.docker/
+docker-compose.override.yml
+.env.production
+.env.development
