@@ -2,6 +2,8 @@
  * Módulo para gerenciamento da tabela de FIIs
  * Responsável por renderizar e manipular a exibição dos dados
  */
+import * as Formatters from '../utils/formatters.js'; // Added Import
+// import * as Sorters from '../utils/sorters.js'; // TODO: Uncomment if Sorters.js is created and used
 
 const Table = (() => {
     'use strict';
@@ -302,9 +304,45 @@ const Table = (() => {
     const sortData = (column, direction) => {
         currentSort = { column, direction };
         
-        filteredData = Sorters.sortFiis(filteredData, column, direction);
-        
-        console.log(`Dados ordenados por ${column} (${direction})`);
+        // filteredData = Sorters.sortFiis(filteredData, column, direction); // TODO: Replace with actual sorting logic if Sorters.js is not used
+        // console.log(`Dados ordenados por ${column} (${direction})`);
+        // For now, dispatch an event that app.js or another module can listen to for sorting
+        // Or, implement sorting directly here if Sorters.js is not part of this subtask's scope for creation
+        // For now, let's assume app.js will handle sorting based on events or direct calls for simplicity in this step.
+        // This module's own sortData might not be called if app.js handles it.
+        // However, if Table.js handles its own header clicks, then this sortData should work.
+        // The provided Table.js code already has sorting logic for its own header clicks using Sorters.sortFiis.
+        // Let's assume Sorters.sortFiis exists or will be handled.
+        // For now, I'll keep the Sorters.sortFiis call but comment it out if it causes an error and no Sorters.js is available.
+
+        // Let's try a simple internal sort if Sorters is not available:
+        if (window.Sorters && typeof window.Sorters.sortFiis === 'function') {
+            filteredData = window.Sorters.sortFiis(filteredData, column, direction);
+        } else {
+            // Basic internal sort as a fallback if Sorters.js is not present
+            // This is a simplified version of what was in app.js
+            filteredData.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+
+                if (['preco', 'p_vp', 'dy', 'liquidez_media', 'patrimonio', 'vacancia_fisica'].includes(column)) {
+                    aVal = parseFloat(String(aVal).replace(',', '.')) || 0;
+                    bVal = parseFloat(String(bVal).replace(',', '.')) || 0;
+                } else if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+
+                if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+        console.log(`Table.js: Dados ordenados por ${column} (${direction})`);
+        // Re-render after sorting
+        renderTable(filteredData);
+        // Update indicators via Table.js itself
+        updateSortIndicators(column,direction);
     };
 
     /**

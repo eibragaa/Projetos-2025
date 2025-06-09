@@ -50,18 +50,23 @@ const Filters = (() => {
     const init = () => {
         // Busca elementos DOM
         elements = {
-            controlsSection: document.getElementById('controlsSection'),
-            sectorFilter: document.getElementById('sectorFilter'),
-            searchInput: document.getElementById('searchInput'),
+            controlsSection: document.getElementById('controlsSection'), // This might be 'filtersSection' from index.html
+            sectorFilter: document.getElementById('segmentoFilter'), // Corrected ID from 'sectorFilter' to 'segmentoFilter'
+            searchInput: document.getElementById('searchInput'), // This element does not exist in index.html's filter section yet
             dataSourceInfo: document.getElementById('dataSourceInfo'),
             dataSourceText: document.getElementById('dataSourceText')
         };
 
         // Verifica se os elementos existem
-        if (!elements.sectorFilter || !elements.searchInput) {
-            console.error('Elementos de filtro não encontrados');
+        // Make searchInput optional for now as it's not in the HTML
+        if (!elements.sectorFilter) {
+            console.error('Elemento de filtro de segmento (segmentoFilter) não encontrado.');
             return false;
         }
+        if (!elements.searchInput) {
+            console.warn('Elemento searchInput não encontrado. Funcionalidade de busca textual não estará disponível via Filters.js.');
+        }
+
 
         // Configura event listeners
         setupEventListeners();
@@ -294,31 +299,34 @@ const Filters = (() => {
     const populateSectorFilter = (data) => {
         if (!elements.sectorFilter) return;
 
-        // Extrai setores únicos
-        const sectors = [...new Set(data.map(fii => fii.setor))].sort();
+        // Extrai setores únicos (should be fii.setor after mapping in worker)
+        const segments = [...new Set(data.map(fii => fii.setor))].sort();
         
-        // Limpa opções existentes (exceto "Todos")
+        // Limpa opções existentes (exceto "Todos os segmentos")
         const allOption = elements.sectorFilter.querySelector('option[value=""]');
         elements.sectorFilter.innerHTML = '';
         
         if (allOption) {
             elements.sectorFilter.appendChild(allOption);
+            allOption.textContent = 'Todos os segmentos'; // Ensure correct text
         } else {
             const defaultOption = document.createElement('option');
             defaultOption.value = '';
-            defaultOption.textContent = 'Todos os setores';
+            defaultOption.textContent = 'Todos os segmentos'; // Match text from index.html
             elements.sectorFilter.appendChild(defaultOption);
         }
 
-        // Adiciona opções de setores
-        sectors.forEach(sector => {
-            const option = document.createElement('option');
-            option.value = sector;
-            option.textContent = sector;
-            elements.sectorFilter.appendChild(option);
+        // Adiciona opções de segmentos
+        segments.forEach(segment => {
+            if (segment) { // Ensure segment is not null or empty
+                const option = document.createElement('option');
+                option.value = segment;
+                option.textContent = segment;
+                elements.sectorFilter.appendChild(option);
+            }
         });
 
-        console.log(`Filtro de setor atualizado com ${sectors.length} setores`);
+        console.log(`Filtro de segmento atualizado com ${segments.length} segmentos.`);
     };
 
     /**
@@ -329,9 +337,11 @@ const Filters = (() => {
         // Atualiza informações na interface
         const stats = {
             total: filteredData.length,
-            sectors: [...new Set(filteredData.map(fii => fii.setor))].length,
-            avgDY: filteredData.length > 0 
-                ? filteredData.reduce((sum, fii) => sum + fii.dividendYield, 0) / filteredData.length 
+            segments: [...new Set(filteredData.map(fii => fii.setor))].length, // Changed from segmento to setor
+            // avgDY calculation might need adjustment if 'dividendYield' field name is different in CSV (e.g. 'dy')
+            // Assuming 'dividendYield' is the correct mapped property name now
+            avgDY: filteredData.length > 0 && typeof filteredData[0].dividendYield !== 'undefined'
+                ? filteredData.reduce((sum, fii) => sum + (parseFloat(fii.dividendYield) || 0), 0) / filteredData.length
                 : 0
         };
 

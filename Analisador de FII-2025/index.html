@@ -8,6 +8,9 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -78,8 +81,13 @@
                         Simplificado
                     </span>
                 </div>
-                <div class="text-sm text-gray-500">
-                    Dados atualizados
+                <div class="flex items-center">
+                    <button id="infoButton" class="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </button>
+                    <div class="text-sm text-gray-500">
+                        Dados atualizados
+                    </div>
                 </div>
             </div>
         </div>
@@ -218,6 +226,31 @@
                 </div>
             </div>
         </div>
+
+        <!-- Charts Section -->
+        <div id="chartsSection" class="hidden mt-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Visualizações Gráficas</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow p-4 md:p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-3">Distribuição por Segmento</h3>
+                    <div class="h-80 md:h-96">
+                        <canvas id="sectorChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4 md:p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-3">Top 10 Dividend Yield</h3>
+                    <div class="h-80 md:h-96">
+                        <canvas id="dividendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 bg-white rounded-lg shadow p-4 md:p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-3">P/VP vs Dividend Yield</h3>
+                <div class="h-96 md:h-[500px]">
+                    <canvas id="scatterChart"></canvas>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Footer -->
@@ -235,293 +268,27 @@
         </div>
     </footer>
 
-    <script type="module">
-        import * as Formatters from './src/js/utils/formatters.js';
-        
-        console.log("Módulos carregados com sucesso");
-        
-        // Configura o Web Worker
-        const csvWorker = new Worker('./csv.worker.js');
-        csvWorker.onmessage = function(event) {
-            console.log("Mensagem recebida do worker");
-            if (event.data.success) {
-                console.log("Worker processou CSV com sucesso");
-                allFiis = event.data.data;
-                console.log("Total de registros:", allFiis.length);
-                filteredFiis = [...allFiis];
-                
-                console.log("Populando filtro de segmento...");
-                populateSegmentFilter();
-                
-                console.log("Renderizando tabela...");
-                renderTable();
-                
-                console.log("Mostrando conteúdo...");
-                showContent();
-            } else {
-                console.error("Erro no worker:", event.data.error);
-                showError(`Erro ao processar CSV: ${event.data.error}`);
-            }
-            console.log("Escondendo indicador de carregamento");
-            hideLoading();
-            console.log("hideLoading() executado");
-        };
-        
-        csvWorker.onerror = function(error) {
-            console.error("Erro no worker:", error);
-            showError(`Erro no worker: ${error.message}`);
-            hideLoading();
-        };
+    <!-- Modal Structure -->
+    <div id="infoModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 transform transition-all">
+            <div class="flex items-start justify-between">
+                <h3 id="modalTitle" class="text-lg font-medium text-gray-900">Título do Modal</h3>
+                <button id="closeModal" type="button" class="text-gray-400 hover:text-gray-600">
+                    <span class="sr-only">Fechar</span>
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="modalContent" class="mt-2">
+                <p class="text-sm text-gray-500">Conteúdo do modal aqui.</p>
+            </div>
+            <div id="modalActions" class="mt-5 sm:mt-6 flex gap-3 justify-end">
+                <!-- Buttons will be added by Modal.js or can be predefined for infoModal -->
+            </div>
+        </div>
+    </div>
 
-        // Global variables
-        // Global variables
-        let allFiis = [];
-        let filteredFiis = [];
-        let currentSort = { field: null, order: 'asc' };
-
-        // Utility functions (usando os formatters importados)
-        const formatCurrency = Formatters.formatCurrency;
-        const formatNumber = Formatters.formatNumber;
-        const formatPercentage = Formatters.formatPercentage;
-        const formatDecimal = Formatters.formatDecimal;
-
-        // Load data from CSV using Web Worker
-        async function loadData() {
-            console.log("Mostrando indicador de carregamento");
-            showLoading();
-            console.log("Iniciando carregamento do CSV...");
-            
-            try {
-                console.log("Iniciando fetch do CSV...");
-                const response = await fetch('statusinvest-busca-avancada.csv');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                console.log("Fetch do CSV completo. Obtendo texto...");
-                const csvText = await response.text();
-                console.log("Texto do CSV obtido. Tamanho:", csvText.length);
-                
-                // Envia o CSV para ser processado pelo worker
-                console.log("Enviando CSV para o worker...");
-                csvWorker.postMessage({ csvText });
-                console.log("CSV enviado para o worker");
-                
-            } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-                showError(`Erro ao carregar dados: ${error.message}`);
-                console.log("Escondendo indicador de carregamento devido a erro");
-                hideLoading();
-            }
-        }
-        
-        
-        function updateLoading(message, progress) {
-            const progressElem = document.getElementById('loadingProgress');
-            const messageElem = document.getElementById('loadingMessage');
-            const detailsElem = document.getElementById('loadingDetails');
-            
-            if (progressElem) progressElem.textContent = `${progress}%`;
-            if (messageElem) messageElem.textContent = message;
-            if (detailsElem) detailsElem.textContent = `Status: ${message}`;
-        }
-
-        // UI functions
-        function showLoading(initialMessage = "Carregando dados dos FIIs...") {
-            const loadingElement = document.getElementById('loadingIndicator');
-            if (loadingElement) {
-                loadingElement.classList.remove('hidden');
-            }
-            document.getElementById('errorContainer').classList.add('hidden');
-            document.getElementById('filtersSection').classList.add('hidden');
-            document.getElementById('tableSection').classList.add('hidden');
-            updateLoading(initialMessage, 0);
-        }
-        
-        function hideLoading() {
-            console.log("Executando hideLoading()");
-            const loadingElement = document.getElementById('loadingIndicator');
-            if (loadingElement) {
-                loadingElement.classList.add('hidden');
-                console.log("Loading indicator escondido via classe hidden");
-            } else {
-                console.error("Elemento loadingIndicator não encontrado");
-            }
-        }
-        
-        function showContent() {
-            document.getElementById('filtersSection').classList.remove('hidden');
-            document.getElementById('tableSection').classList.remove('hidden');
-        }
-        
-        function showError(message) {
-            document.getElementById('errorMessage').innerHTML = message;
-            document.getElementById('errorContainer').classList.remove('hidden');
-        }
-
-        // Populate segment filter
-        function populateSegmentFilter() {
-            const segments = [...new Set(allFiis.map(fii => fii.segmento))].sort();
-            const select = document.getElementById('segmentoFilter');
-            
-            // Clear existing options except the first one
-            while (select.children.length > 1) {
-                select.removeChild(select.lastChild);
-            }
-            
-            segments.forEach(segment => {
-                const option = document.createElement('option');
-                option.value = segment;
-                option.textContent = segment;
-                select.appendChild(option);
-            });
-        }
-
-        // Filter functions
-        function applyFilters() {
-            const segmentoFilter = document.getElementById('segmentoFilter').value;
-            const pvpMaxFilter = document.getElementById('pvpMaxFilter').value;
-            const dyMinFilter = document.getElementById('dyMinFilter').value;
-
-            filteredFiis = allFiis.filter(fii => {
-                // Segmento filter
-                if (segmentoFilter && fii.segmento !== segmentoFilter) {
-                    return false;
-                }
-
-                // P/VP max filter
-                if (pvpMaxFilter) {
-                    const pvp = parseFloat(fii.p_vp);
-                    const maxPvp = parseFloat(pvpMaxFilter);
-                    if (isNaN(pvp) || isNaN(maxPvp) || pvp > maxPvp) {
-                        return false;
-                    }
-                }
-
-                // DY min filter
-                if (dyMinFilter) {
-                    const dy = parseFloat(fii.dy);
-                    const minDy = parseFloat(dyMinFilter);
-                    if (isNaN(dy) || isNaN(minDy) || dy < minDy) {
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-
-            renderTable();
-        }
-
-        function clearFilters() {
-            document.getElementById('segmentoFilter').value = '';
-            document.getElementById('pvpMaxFilter').value = '';
-            document.getElementById('dyMinFilter').value = '';
-            
-            filteredFiis = [...allFiis];
-            renderTable();
-        }
-
-        // Sorting functions
-        function sortData(field) {
-            if (currentSort.field === field) {
-                currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
-            } else {
-                currentSort.field = field;
-                currentSort.order = 'asc';
-            }
-
-            filteredFiis.sort((a, b) => {
-                let aVal = a[field];
-                let bVal = b[field];
-
-                // Handle numeric fields
-                if (['preco', 'p_vp', 'dy', 'liquidez_media', 'patrimonio', 'vacancia_fisica'].includes(field)) {
-                    aVal = parseFloat(aVal) || 0;
-                    bVal = parseFloat(bVal) || 0;
-                }
-
-                if (aVal < bVal) return currentSort.order === 'asc' ? -1 : 1;
-                if (aVal > bVal) return currentSort.order === 'asc' ? 1 : -1;
-                return 0;
-            });
-
-            updateSortIndicators();
-            renderTable();
-        }
-
-        function updateSortIndicators() {
-            // Remove all sort indicators
-            document.querySelectorAll('.sortable').forEach(th => {
-                th.classList.remove('sort-asc', 'sort-desc');
-            });
-
-            // Add indicator to current sort field
-            if (currentSort.field) {
-                const th = document.querySelector(`[data-field="${currentSort.field}"]`);
-                if (th) {
-                    th.classList.add(currentSort.order === 'asc' ? 'sort-asc' : 'sort-desc');
-                }
-            }
-        }
-
-        // Render table
-        function renderTable() {
-            const tbody = document.getElementById('fiiTableBody');
-            const fiiCount = document.getElementById('fiiCount');
-            
-            // Update count
-            fiiCount.textContent = filteredFiis.length;
-            
-            // Clear table
-            tbody.innerHTML = '';
-            
-            // Render rows
-            filteredFiis.forEach(fii => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-                
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${fii.papel}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${fii.segmento}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatCurrency(fii.preco)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatPercentage(fii.dy)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatDecimal(fii.p_vp)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatCurrency(fii.liquidez_media)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatNumber(fii.patrimonio)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatPercentage(fii.vacancia_fisica)}</td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-        }
-
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Carrega os dados imediatamente após a renderização inicial
-            loadData();
-
-            // Filter event listeners
-            document.getElementById('applyFilters').addEventListener('click', applyFilters);
-            document.getElementById('clearFilters').addEventListener('click', clearFilters);
-
-            // Enter key on filter inputs
-            document.getElementById('pvpMaxFilter').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') applyFilters();
-            });
-            document.getElementById('dyMinFilter').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') applyFilters();
-            });
-
-            // Sort event listeners
-            document.querySelectorAll('.sortable').forEach(th => {
-                th.addEventListener('click', function() {
-                    const field = this.getAttribute('data-field');
-                    sortData(field);
-                });
-            });
-        });
-    </script>
+    <script type="module" src="src/js/app.js"></script>
 </body>
 </html>
